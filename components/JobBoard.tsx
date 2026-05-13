@@ -34,6 +34,8 @@ const COMPANY_COLORS: Record<string, string> = {
   "RISA Labs":     "bg-orange-100  text-orange-800",
   "Zime":          "bg-blue-100    text-blue-800",
   "Devicethread":  "bg-teal-100    text-teal-800",
+  "Conifer":       "bg-lime-100    text-lime-800",
+  "Refold":        "bg-rose-100    text-rose-800",
 };
 const DEFAULT_COLOR = "bg-gray-100 text-gray-700";
 const companyColor = (name: string) => COMPANY_COLORS[name] ?? DEFAULT_COLOR;
@@ -327,14 +329,9 @@ export default function JobBoard({
                   rel="noopener noreferrer"
                   className="group flex items-center justify-between bg-white border border-gray-200 rounded-xl px-5 py-3.5 hover:border-[#DE5126]/50 hover:shadow-sm transition-all"
                 >
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800 group-hover:text-[#DE5126] transition-colors">
-                      {c.name}
-                    </p>
-                    {c.description && (
-                      <p className="text-xs text-gray-400 mt-0.5">{c.description}</p>
-                    )}
-                  </div>
+                  <p className="text-sm font-semibold text-gray-800 group-hover:text-[#DE5126] transition-colors">
+                    {c.name}
+                  </p>
                   <span className="text-xs text-gray-400 group-hover:text-[#DE5126] flex items-center gap-1 shrink-0 transition-colors">
                     View jobs <ExternalLinkIcon />
                   </span>

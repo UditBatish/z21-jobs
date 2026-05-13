@@ -296,16 +296,171 @@ def scrape_devicethread_html(company: dict) -> list[dict]:
     return jobs
 
 
+# ── Notion helpers ────────────────────────────────────────────────────────────
+
+def _notion_prop_text(props: dict, key: str) -> str:
+    arr = props.get(key, [])
+    return "".join(t[0] for t in arr if isinstance(t, list) and t).strip()
+
+
+# ── Notion collection (database) ──────────────────────────────────────────────
+
+def scrape_notion_collection(company: dict) -> list[dict]:
+    """For Notion-database job boards (e.g. Conifer)."""
+    collection_id = company["notion_collection_id"]
+    view_id = company["notion_view_id"]
+    m = re.search(r"https://([^.]+)\.notion\.site", company["url"])
+    subdomain = m.group(1) if m else "notion"
+
+    resp = requests.post(
+        "https://www.notion.so/api/v3/queryCollection",
+        json={
+            "collectionId": collection_id,
+            "collectionViewId": view_id,
+            "query": {},
+            "loader": {
+                "type": "reducer",
+                "reducers": {"collection_group_results": {"type": "results", "limit": 100}},
+                "searchQuery": "",
+                "userTimeZone": "UTC",
+            },
+        },
+        headers=HEADERS,
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+
+    # Build schema map: field_name_lower → property_key
+    schema_map: dict[str, str] = {}
+    for cid, rec in data.get("recordMap", {}).get("collection", {}).items():
+        v = rec.get("value", {}).get("value", {}) or rec.get("value", {})
+        for key, field in v.get("schema", {}).items():
+            schema_map[field.get("name", "").lower()] = key
+
+    location_key = schema_map.get("location", "")
+    team_key     = schema_map.get("team", "") or schema_map.get("department", "")
+    status_key   = schema_map.get("status", "")
+
+    jobs = []
+    for bid, rec in data.get("recordMap", {}).get("block", {}).items():
+        v = rec.get("value", {}).get("value", {}) or rec.get("value", {})
+        if v.get("type") != "page":
+            continue
+        props = v.get("properties", {})
+        title = _notion_prop_text(props, "title")
+        if not title or title.lower() in ("careers", "job positions"):
+            continue
+        if status_key:
+            status = _notion_prop_text(props, status_key)
+            if status.lower() == "closed":
+                continue
+        location   = _notion_prop_text(props, location_key)  if location_key  else ""
+        department = _notion_prop_text(props, team_key)       if team_key      else ""
+        job_url = "https://%s.notion.site/%s" % (subdomain, bid.replace("-", ""))
+        jobs.append({
+            "id": make_id(job_url),
+            "company": company["name"],
+            "title": title,
+            "department": department,
+            "location": location,
+            "type": "",
+            "salary": "",
+            "url": job_url,
+            "posted_at": "",
+            "scraped_at": today(),
+        })
+    return jobs
+
+
+# ── Notion toggles (open-positions via toggle blocks) ─────────────────────────
+
+def scrape_notion_toggles(company: dict) -> list[dict]:
+    """For Notion pages where jobs live inside toggle blocks (e.g. Refold)."""
+    page_id = company["notion_page_id"]
+    m = re.search(r"https://([^.]+)\.notion\.site", company["url"])
+    subdomain = m.group(1) if m else "notion"
+
+    resp = requests.post(
+        "https://www.notion.so/api/v3/loadPageChunk",
+        json={"pageId": page_id, "limit": 100, "cursor": {"stack": []}, "chunkNumber": 0, "verticalColumns": False},
+        headers=HEADERS,
+        timeout=15,
+    )
+    resp.raise_for_status()
+    blocks = resp.json().get("recordMap", {}).get("block", {})
+
+    # Walk top-level blocks in page order
+    page_v = blocks.get(page_id, {}).get("value", {}).get("value", {})
+    top_ids = page_v.get("content", [])
+
+    in_open = False
+    job_ids: list[str] = []
+    for bid in top_ids:
+        b  = blocks.get(bid, {})
+        bv = b.get("value", {}).get("value", {})
+        btype = bv.get("type", "")
+        props = bv.get("properties", {})
+        title_arr = props.get("title", [])
+        title = "".join(t[0] for t in title_arr if isinstance(t, list) and t)
+
+        if btype in ("header", "sub_header"):
+            if "open position" in title.lower():
+                in_open = True
+            elif in_open:
+                break  # left the section
+        elif in_open and btype == "toggle":
+            if "archive" not in title.lower() and "closed" not in title.lower():
+                job_ids.extend(bv.get("content", []))
+
+    if not job_ids:
+        return []
+
+    resp2 = requests.post(
+        "https://www.notion.so/api/v3/syncRecordValues",
+        json={"requests": [{"pointer": {"table": "block", "id": jid}, "version": -1} for jid in job_ids]},
+        headers=HEADERS,
+        timeout=15,
+    )
+    resp2.raise_for_status()
+    job_blocks = resp2.json().get("recordMap", {}).get("block", {})
+
+    jobs = []
+    for jid in job_ids:
+        jv = job_blocks.get(jid, {}).get("value", {}).get("value", {})
+        props = jv.get("properties", {})
+        title_arr = props.get("title", [])
+        title = "".join(t[0] for t in title_arr if isinstance(t, list) and t).strip()
+        if not title:
+            continue
+        job_url = "https://%s.notion.site/%s" % (subdomain, jid.replace("-", ""))
+        jobs.append({
+            "id": make_id(job_url),
+            "company": company["name"],
+            "title": title,
+            "department": "",
+            "location": "India",
+            "type": "",
+            "salary": "",
+            "url": job_url,
+            "posted_at": "",
+            "scraped_at": today(),
+        })
+    return jobs
+
+
 # ── Dispatch ──────────────────────────────────────────────────────────────────
 
 SCRAPERS = {
-    "workable": scrape_workable,
-    "yc": scrape_yc,
-    "teamtailor": scrape_teamtailor,
-    "greenhouse": scrape_greenhouse,
-    "lever": scrape_lever,
-    "zime_html": scrape_zime_html,
-    "devicethread_html": scrape_devicethread_html,
+    "workable":            scrape_workable,
+    "yc":                  scrape_yc,
+    "teamtailor":          scrape_teamtailor,
+    "greenhouse":          scrape_greenhouse,
+    "lever":               scrape_lever,
+    "zime_html":           scrape_zime_html,
+    "devicethread_html":   scrape_devicethread_html,
+    "notion_collection":   scrape_notion_collection,
+    "notion_toggles":      scrape_notion_toggles,
     # "link" type is intentionally excluded — no scraping
 }
 

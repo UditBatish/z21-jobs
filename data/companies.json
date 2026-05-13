@@ -52,7 +52,9 @@
   {
     "name": "Conifer",
     "url": "https://prism-cork-8f6.notion.site/careers-conifer",
-    "type": "link",
+    "type": "notion_collection",
+    "notion_collection_id": "1b1980ee-54b9-8127-bfd2-000b02dcda31",
+    "notion_view_id": "2e1980ee-54b9-8000-b62c-000c5995e6fd",
     "website": "",
     "description": ""
   },
@@ -66,7 +68,8 @@
   {
     "name": "Refold",
     "url": "https://refold.notion.site/Work-Refold-AI-21eb06e6391e808f88a6eddcee869645",
-    "type": "link",
+    "type": "notion_toggles",
+    "notion_page_id": "21eb06e6-391e-808f-88a6-eddcee869645",
     "website": "https://refold.ai/",
     "description": "AI language learning"
   }

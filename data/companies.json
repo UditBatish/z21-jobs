@@ -1,0 +1,73 @@
+[
+  {
+    "name": "Origin",
+    "url": "https://apply.workable.com/origin-10x/",
+    "type": "workable",
+    "website": "https://10xconstruction.ai/",
+    "description": "Autonomous robots for construction"
+  },
+  {
+    "name": "Lighthouz AI",
+    "url": "https://www.ycombinator.com/companies/lighthouz-ai/jobs",
+    "type": "yc",
+    "website": "https://lighthouz.ai/",
+    "description": "AI-powered freight back-office automation"
+  },
+  {
+    "name": "Greenjets",
+    "url": "https://careers.greenjets.com/jobs",
+    "type": "teamtailor",
+    "website": "https://www.greenjets.com/",
+    "description": "High-performance propulsion systems for aviation"
+  },
+  {
+    "name": "RISA Labs",
+    "url": "https://www.risalabs.ai/careers",
+    "type": "greenhouse",
+    "greenhouse_slug": "risalabs",
+    "website": "https://risalabs.ai/",
+    "description": "AI operating system for oncology"
+  },
+  {
+    "name": "Zime",
+    "url": "https://zime.ai/careers",
+    "type": "zime_html",
+    "website": "https://zime.ai/",
+    "description": "AI compliance automation"
+  },
+  {
+    "name": "Devicethread",
+    "url": "https://www.devicethread.com/careers.html",
+    "type": "devicethread_html",
+    "website": "https://devicethread.com/",
+    "description": "Connected device management platform"
+  },
+  {
+    "name": "Coverself",
+    "url": "https://coverself.keka.com/careers/",
+    "type": "link",
+    "website": "https://coverself.com/",
+    "description": "AI-powered insurance automation"
+  },
+  {
+    "name": "Conifer",
+    "url": "https://prism-cork-8f6.notion.site/careers-conifer",
+    "type": "link",
+    "website": "",
+    "description": ""
+  },
+  {
+    "name": "Truefoundry",
+    "url": "https://app.careerpuck.com/job-board/truefoundry",
+    "type": "link",
+    "website": "https://truefoundry.com/",
+    "description": "ML deployment platform"
+  },
+  {
+    "name": "Refold",
+    "url": "https://refold.notion.site/Work-Refold-AI-21eb06e6391e808f88a6eddcee869645",
+    "type": "link",
+    "website": "https://refold.ai/",
+    "description": "AI language learning"
+  }
+]

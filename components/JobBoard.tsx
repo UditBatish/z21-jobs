@@ -43,7 +43,7 @@ const companyColor = (name: string) => COMPANY_COLORS[name] ?? DEFAULT_COLOR;
 // ── Location normalisation ────────────────────────────────────────────────────
 
 const INDIA_HINTS = ["india", "bangalore", "bengaluru", "delhi", "dl, in", "gurgaon", "hyderabad", "mumbai", "pune", "chennai", "kolkata"];
-const US_HINTS    = ["united states", "usa", ", us", "california", "new york", "san francisco", "palo alto", "boston", "seattle", "chicago", "los angeles", "nyc", "austin"];
+const US_HINTS    = ["united states", "usa", ", us", "california", " ca", ", ca", "new york", " ny", ", ny", "san francisco", "palo alto", "sunnyvale", "san jose", "mountain view", "menlo park", "boston", "seattle", "chicago", "los angeles", "nyc", "austin"];
 
 type Region = "India" | "United States" | "Remote" | "Rest of World";
 
